@@ -56,7 +56,13 @@ function mainMenu () {
 };
 
 function viewEmployees() {
-  connection.query('SELECT * FROM employees', 
+  connection.query(`SELECT e.id, e.first_name, e.last_name, 
+                   roles.title AS Title, departments.name AS Department, roles.salary,
+                   CONCAT(m.first_name,' ',m.last_name) AS Manager                    
+                   FROM employees e
+                   LEFT JOIN roles ON e.role_id = roles.id
+                   LEFT JOIN departments ON roles.dept_id = departments.id
+                   LEFT JOIN employees m ON e.manager_id = m.id`, 
     function(err, results) {
       console.table(results);
     }

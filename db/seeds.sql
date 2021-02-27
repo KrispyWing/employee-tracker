@@ -1,16 +1,3 @@
-INSERT INTO employees (first_name, last_name, role_id, manager_id)
-VALUES
-  ('Ronald', 'Firbank', 1, NULL),
-  ('Virginia', 'Woolf', 1, 1),
-  ('Piers', 'Gaveston', 1, NULL),
-  ('Charles', 'LeRoi', 2, 1),
-  ('Katherine', 'Mansfield', 2, 1),
-  ('Dora', 'Carrington', 3, 2),
-  ('Edward', 'Bellamy', 3, 2),
-  ('Montague', 'Summers', 3, NULL),
-  ('Octavia', 'Butler', 3, 2),
-  ('Unica', 'Zurn', 4, NULL);
-
 INSERT INTO departments (name)
 VALUES
   ('Sales'),
@@ -28,3 +15,16 @@ VALUES
   ('Legal Team Lead', 200000, 3),
   ('Lawyer', 165000, 3),
   ('Accountant', 125000, 4);
+
+INSERT INTO employees (first_name, last_name, role_id, manager_id)
+VALUES
+  ('Ronald', 'Firbank', 1, NULL),
+  ('Virginia', 'Woolf', 2, 1),
+  ('Piers', 'Gaveston', 3, NULL),
+  ('Charles', 'LeRoi', 4, 3),
+  ('Katherine', 'Mansfield', 5, 3),
+  ('Dora', 'Carrington', 6, NULL),
+  ('Edward', 'Bellamy', 7, 6),
+  ('Montague', 'Summers', 7, 6),
+  ('Octavia', 'Butler', 8, NULL),
+  ('Unica', 'Zurn', 8, NULL);
