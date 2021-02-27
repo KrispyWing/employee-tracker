@@ -17,3 +17,14 @@ VALUES
   ('Engineering'),
   ('Legal'),
   ('Finance');
+
+INSERT INTO roles (title, salary, dept_id)
+VALUES
+  ('Sales Lead', 80000, 1),
+  ('Salesperson', 50000, 1),
+  ('Lead Engineer', 150000, 2),
+  ('Software Engineer', 120000, 2),
+  ('Junior Developer', 100000, 2),
+  ('Legal Team Lead', 200000, 3),
+  ('Lawyer', 165000, 3),
+  ('Accountant', 125000, 4);
