@@ -10,3 +10,10 @@ VALUES
   ('Montague', 'Summers', 3, NULL),
   ('Octavia', 'Butler', 3, 2),
   ('Unica', 'Zurn', 4, NULL);
+
+INSERT INTO departments (name)
+VALUES
+  ('Sales'),
+  ('Engineering'),
+  ('Legal'),
+  ('Finance');

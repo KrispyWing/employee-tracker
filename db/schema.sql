@@ -12,4 +12,7 @@ CREATE TABLE employees (
   manager_id INTEGER
 );
 
-CREA
+CREATE TABLE departments (
+  id INTEGER AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(30)
+);
