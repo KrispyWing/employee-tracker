@@ -1,7 +1,6 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
-const { async } = require('rxjs');
 require('dotenv').config();
 
 //Create connection for the sql databse
