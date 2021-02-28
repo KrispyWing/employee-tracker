@@ -164,15 +164,7 @@ async function addEmployee() {
       }
     )
   })
-})
-//   .then(res => {
-//     console.log(res);
-//     db.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', [res.firstName, res.lastName, res.role, res.manager], (err, res) => {
-//       if (err) throw err;
-//       console.log('EMPLOYEE ADDED\n');
-//       mainMenu();
-//     });    
-//   });
+  })
 };
 
 
@@ -223,9 +215,22 @@ async function changeRole() {
         if (err) throw err;
         console.log('EMPLOYEE ROLE HAS BEEN UPDATED\n');
         mainMenu();
-      }
-    )  
-    })
-    //mainMenu();      
+      });  
+    });          
   });
 }
+
+// ROLE FUNCTIONS
+
+//View All Roles
+async function viewRoles() {
+  db.query(`SELECT roles.id, roles.title, departments.name as Department, roles.salary
+            FROM roles
+            LEFT JOIN departments ON roles.dept_id = departments.id`, 
+    async function(err, results) {
+      if (err) throw err;
+      console.table(results);
+      mainMenu();
+    }
+  );  
+};
