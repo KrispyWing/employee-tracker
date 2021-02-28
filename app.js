@@ -1,6 +1,7 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+const { async } = require('rxjs');
 require('dotenv').config();
 
 //Create connection for the sql databse
@@ -80,12 +81,7 @@ function viewEmployees() {
   );  
 };
 
-function addEmployee() {
-  // let roles = db.query('SELECT id, title FROM roles', (err, res) => {
-  //   if (err) throw err;    
-  // });
-  // let managers = db.promise().query('SELECT id, CONCAT(first_name," ",last_name) AS Manager FROM employees');
-  //console.log(roles);
+function askName() {
   return inquirer.prompt([
     {
       type: 'input' ,
@@ -96,26 +92,81 @@ function addEmployee() {
       type: 'input',
       name: 'lastName',
       message: 'What is the employees last name:'
-    },
+    }
+  ]);
+}
+
+async function addEmployee() {
+  // let roles = db.query('SELECT id, title FROM roles', (err, res) => {
+  //   if (err) throw err;    
+  // });
+  // let managers = db.promise().query('SELECT id, CONCAT(first_name," ",last_name) AS Manager FROM employees');
+  //console.log(roles);
+  const addName = await askName();
+  db.query('SELECT id, title FROM roles', async (err, res) => {
+  let { role } = await inquirer.prompt([
     {
-      type: 'input',
+      type: 'list',
       name: 'role',
       message: 'What is the employees role?',
-      //choices: ['test']
-    },
-    {
-      type: 'input',
-      name: 'manager',
-      message: 'Who is the employees Manager?',
-      //choices: ['test']//managers.map(obj => obj.Manager)
+      choices: () => res.map(res => res.title)
     }
-  ])
-  .then(res => {
-    console.log(res);
-    db.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', [res.firstName, res.lastName, res.role, res.manager], (err, res) => {
-      if (err) throw err;
-      console.log('EMPLOYEE ADDED\n');
-      mainMenu();
-    });    
-  });
+  ]);
+  let roleId;
+  for (const row of res) {
+    if (row.title === role) {
+      roleId = row.id;
+      //return roleId;
+    }
+  }  
+  db.query('SELECT * FROM employees', async (err, res) => {
+    if (err) throw err;
+    let choices = res.map(res => `${res.first_name} ${res.last_name}`);
+    choices.push('none');
+    let { manager } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'manager',
+        message: 'Choose this employees Manager:',
+        choices: choices
+      }
+    ]);
+    let managerId;
+    let managerName;
+    if (manager === 'none') {
+      managerId = null;
+    } else {
+      for (const data of res) {
+        data.fullName = `${data.first_name} ${data.last_name}`;
+        if (data.fullName === manager) {
+          managerId = data.id;
+          managerName = data.fullName;
+          console.log(managerId);
+          console.log(managerName);
+        }
+      }
+    }
+    db.query('INSERT INTO employees SET ?',
+      {
+        first_name: addName.firstName,
+        last_name: addName.lastName,
+        role_id: roleId,
+        manager_id: parseInt(managerId)
+      },
+      (err, res) => {
+        if (err) throw err;
+        console.log('EMPLOYEE HAS BEEN ADDED\n');
+        mainMenu();
+      }
+    )
+  })
+})
+//   .then(res => {
+//     console.log(res);
+//     db.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', [res.firstName, res.lastName, res.role, res.manager], (err, res) => {
+//       if (err) throw err;
+//       console.log('EMPLOYEE ADDED\n');
+//       mainMenu();
+//     });    
+//   });
 };
