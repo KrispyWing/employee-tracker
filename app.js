@@ -22,7 +22,7 @@ db.connect(err => {
   mainMenu();
 });
 
-function mainMenu () {
+async function mainMenu () {
   return inquirer.prompt([
     {
       type: 'list',
@@ -40,7 +40,7 @@ function mainMenu () {
       ]
     }
   ])
-  .then(function(data) {
+  .then(async function(data) {
     switch (data.menu) {
       case "View Departments":
         viewDept();
@@ -58,6 +58,10 @@ function mainMenu () {
         addEmployee();
         break;
 
+      case "Update Employee Role":
+        changeRole();
+        break;
+
       case "Exit":
         db.end();
     }
@@ -65,7 +69,7 @@ function mainMenu () {
 };
 
 //Employee Functions
-function viewEmployees() {
+async function viewEmployees() {
   db.query(`SELECT e.id, e.first_name, e.last_name, 
                    roles.title AS Title, departments.name AS Department, roles.salary,
                    CONCAT(m.first_name,' ',m.last_name) AS Manager                    
@@ -73,7 +77,7 @@ function viewEmployees() {
                    LEFT JOIN roles ON e.role_id = roles.id
                    LEFT JOIN departments ON roles.dept_id = departments.id
                    LEFT JOIN employees m ON e.manager_id = m.id`, 
-    function(err, results) {
+    async function(err, results) {
       if (err) throw err;
       console.table(results);
       mainMenu();
@@ -170,3 +174,58 @@ async function addEmployee() {
 //     });    
 //   });
 };
+
+
+
+async function changeRole() {
+  db.query('SELECT * FROM employees', async (err, res) => {
+    if (err) throw err;
+    let choices = res.map(res => `${res.id} ${res.first_name} ${res.last_name}`);
+    let { employee } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'employee',
+        message: 'Which employee do you want to update:',
+        choices: choices
+      }
+    ]);
+    console.log(employee);
+    console.log(typeof employee);
+    let empId = employee.replace(/\D/g, '');
+    console.log(empId);
+    db.query('SELECT id, title FROM roles', async (err, res) => {
+      if (err) throw err;
+      let { role } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'role',
+          message: 'What is the employees new role?',
+          choices: () => res.map(res => res.title)
+        }
+      ]);
+      let roleId;
+      for (const row of res) {
+        if (row.title === role) {
+          roleId = row.id;
+          console.log(roleId);
+        }
+      }
+      db.query('UPDATE employees SET ? WHERE ?',
+      [
+        {
+          role_id: roleId
+        },
+        {
+          id: parseInt(empId)
+        }
+      ],
+      (err, res) => {
+        if (err) throw err;
+        console.log('EMPLOYEE ROLE HAS BEEN UPDATED\n');
+        mainMenu();
+      }
+    )  
+    })
+    //mainMenu();      
+  });
+}
