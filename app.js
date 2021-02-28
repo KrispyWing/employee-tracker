@@ -53,6 +53,10 @@ async function mainMenu () {
       case "View Employees":
         viewEmployees();
         break;
+      
+      case "Add Role":
+        addRole();
+        break;
 
       case "Add Employee":
         addEmployee();
@@ -108,62 +112,63 @@ async function addEmployee() {
   //console.log(roles);
   const addName = await askName();
   db.query('SELECT id, title FROM roles', async (err, res) => {
-  let { role } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'role',
-      message: 'What is the employees role?',
-      choices: () => res.map(res => res.title)
-    }
-  ]);
-  let roleId;
-  for (const row of res) {
-    if (row.title === role) {
-      roleId = row.id;
-      //return roleId;
-    }
-  }  
-  db.query('SELECT * FROM employees', async (err, res) => {
     if (err) throw err;
-    let choices = res.map(res => `${res.first_name} ${res.last_name}`);
-    choices.push('none');
-    let { manager } = await inquirer.prompt([
+    let { role } = await inquirer.prompt([
       {
         type: 'list',
-        name: 'manager',
-        message: 'Choose this employees Manager:',
-        choices: choices
+        name: 'role',
+        message: 'What is the employees role?',
+        choices: () => res.map(res => res.title)
       }
     ]);
-    let managerId;
-    let managerName;
-    if (manager === 'none') {
-      managerId = null;
-    } else {
-      for (const data of res) {
-        data.fullName = `${data.first_name} ${data.last_name}`;
-        if (data.fullName === manager) {
-          managerId = data.id;
-          managerName = data.fullName;
-          console.log(managerId);
-          console.log(managerName);
+    let roleId;
+    for (const row of res) {
+      if (row.title === role) {
+        roleId = row.id;
+      //return roleId;
+      }
+    }  
+    db.query('SELECT * FROM employees', async (err, res) => {
+      if (err) throw err;
+      let choices = res.map(res => `${res.first_name} ${res.last_name}`);
+      choices.push('none');
+      let { manager } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'manager',
+          message: 'Choose this employees Manager:',
+          choices: choices
+        }
+      ]);
+      let managerId;
+      let managerName;
+      if (manager === 'none') {
+        managerId = null;
+      } else {
+        for (const data of res) {
+          data.fullName = `${data.first_name} ${data.last_name}`;
+          if (data.fullName === manager) {
+            managerId = data.id;
+            managerName = data.fullName;
+            console.log(managerId);
+            console.log(managerName);
+          }
         }
       }
-    }
-    db.query('INSERT INTO employees SET ?',
-      {
-        first_name: addName.firstName,
-        last_name: addName.lastName,
-        role_id: roleId,
-        manager_id: parseInt(managerId)
-      },
-      (err, res) => {
-        if (err) throw err;
-        console.log('EMPLOYEE HAS BEEN ADDED\n');
-        mainMenu();
-      }
-    )
-  })
+      db.query('INSERT INTO employees SET ?',
+        {
+          first_name: addName.firstName,
+          last_name: addName.lastName,
+          role_id: roleId,
+          manager_id: parseInt(managerId)
+        },
+        (err, res) => {
+          if (err) throw err;
+          console.log('EMPLOYEE HAS BEEN ADDED\n');
+          mainMenu();
+        }
+      )
+    })
   })
 };
 
@@ -234,3 +239,55 @@ async function viewRoles() {
     }
   );  
 };
+
+//Add a Role
+function roleData() {
+  return inquirer.prompt([
+    {
+      type: 'input',
+      name: 'name',
+      message: "What is name of the new role?"
+    },
+    {
+      type: 'number',
+      name: 'salary',
+      message: 'What is the salary for this role?'
+    }
+  ]);
+}
+
+async function addRole() {
+  const newRole = await roleData();  
+  db.query('SELECT * FROM departments', async (err, res) => {
+    if (err) throw err;    
+    let { dept } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'dept',
+        message: 'What department does this role belong to?',
+        choices: () => res.map(res => res.name)
+      }
+    ]);
+    let deptId;
+    console.log(dept);
+    //console.log(department);
+    for (const row of res) {
+      if (row.name === dept) {
+        deptId = row.id;
+        console.log(deptId);
+      }
+    }
+    db.query('INSERT INTO roles SET ?',
+        {
+          title: newRole.name,
+          salary: newRole.salary,
+          dept_id: parseInt(deptId)          
+        },
+        (err, res) => {
+          if (err) throw err;
+          console.log('NEW ROLE HAS BEEN ADDED\n');
+          mainMenu();
+        }
+      )
+  })
+}
