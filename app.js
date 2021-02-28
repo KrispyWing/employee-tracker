@@ -17,12 +17,15 @@ const db = mysql.createConnection({
 db.connect(err => {
   if (err) throw err;
   console.log('connected as id ' + db.threadId);
-  console.log('WELCOME TO THE EMPLOYEE MANAGEMENT SYSTEM')
+  console.log(
+    '\n*********************************************\n* WELCOME TO THE EMPLOYEE MANAGEMENT SYSTEM *\n*********************************************'
+    );
   //Call to Start main function goes here
   mainMenu();
 });
 
 async function mainMenu () {
+  console.log('\n ***MAIN MENU***')
   return inquirer.prompt([
     {
       type: 'list',
@@ -87,6 +90,7 @@ async function viewEmployees() {
                    LEFT JOIN employees m ON e.manager_id = m.id`, 
     async function(err, results) {
       if (err) throw err;
+      console.log('\n EMPLOYEES')
       console.table(results);
       mainMenu();
     }
@@ -109,11 +113,6 @@ function askName() {
 }
 
 async function addEmployee() {
-  // let roles = db.query('SELECT id, title FROM roles', (err, res) => {
-  //   if (err) throw err;    
-  // });
-  // let managers = db.promise().query('SELECT id, CONCAT(first_name," ",last_name) AS Manager FROM employees');
-  //console.log(roles);
   const addName = await askName();
   db.query('SELECT id, title FROM roles', async (err, res) => {
     if (err) throw err;
@@ -129,7 +128,6 @@ async function addEmployee() {
     for (const row of res) {
       if (row.title === role) {
         roleId = row.id;
-      //return roleId;
       }
     }  
     db.query('SELECT * FROM employees', async (err, res) => {
@@ -152,10 +150,8 @@ async function addEmployee() {
         for (const data of res) {
           data.fullName = `${data.first_name} ${data.last_name}`;
           if (data.fullName === manager) {
-            managerId = data.id;
-            managerName = data.fullName;
-            console.log(managerId);
-            console.log(managerName);
+            managerId = parseInt(data.id);
+            managerName = data.fullName;            
           }
         }
       }
@@ -164,11 +160,11 @@ async function addEmployee() {
           first_name: addName.firstName,
           last_name: addName.lastName,
           role_id: roleId,
-          manager_id: parseInt(managerId)
+          manager_id: managerId
         },
         (err, res) => {
           if (err) throw err;
-          console.log('EMPLOYEE HAS BEEN ADDED\n');
+          console.log('***EMPLOYEE HAS BEEN ADDED***\n');
           mainMenu();
         }
       )
@@ -190,10 +186,9 @@ async function changeRole() {
         choices: choices
       }
     ]);
-    console.log(employee);
-    console.log(typeof employee);
+    
     let empId = employee.replace(/\D/g, '');
-    console.log(empId);
+    
     db.query('SELECT id, title FROM roles', async (err, res) => {
       if (err) throw err;
       let { role } = await inquirer.prompt([
@@ -222,7 +217,7 @@ async function changeRole() {
       ],
       (err, res) => {
         if (err) throw err;
-        console.log('EMPLOYEE ROLE HAS BEEN UPDATED\n');
+        console.log('***EMPLOYEE ROLE HAS BEEN UPDATED***\n');
         mainMenu();
       });  
     });          
@@ -238,6 +233,7 @@ async function viewRoles() {
             LEFT JOIN departments ON roles.dept_id = departments.id`, 
     async function(err, results) {
       if (err) throw err;
+      console.log('\n ROLES')
       console.table(results);
       mainMenu();
     }
@@ -289,7 +285,7 @@ async function addRole() {
         },
         (err, res) => {
           if (err) throw err;
-          console.log('NEW ROLE HAS BEEN ADDED\n');
+          console.log('***NEW ROLE HAS BEEN ADDED***\n');
           mainMenu();
         }
       )
@@ -303,7 +299,7 @@ async function viewDept() {
   db.query(`SELECT * FROM departments`, 
     async function(err, results) {
       if (err) throw err;
-      console.log('\nDEPARTMENTS');
+      console.log('\n DEPARTMENTS');
       console.table(results);
       mainMenu();
     }
