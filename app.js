@@ -53,6 +53,10 @@ async function mainMenu () {
       case "View Employees":
         viewEmployees();
         break;
+
+      case "Add Department":
+        addDept();
+        break;
       
       case "Add Role":
         addRole();
@@ -291,3 +295,40 @@ async function addRole() {
       )
   })
 }
+
+//Department Functions
+
+//View Departments
+async function viewDept() {
+  db.query(`SELECT * FROM departments`, 
+    async function(err, results) {
+      if (err) throw err;
+      console.log('\nDEPARTMENTS');
+      console.table(results);
+      mainMenu();
+    }
+  );  
+};
+
+//Add Department
+async function addDept() {
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'newDept',
+      message: 'What is the name of the new Department?'
+    }
+  ])
+  .then(data => {
+    db.query('INSERT INTO departments SET ?',
+      {
+        name: data.newDept
+      },
+      (err, res) => {
+        if (err) throw err;
+        console.log('***NEW DEPARTMENT HAS BEEN ADDED***\n');
+        mainMenu();
+      }
+    );
+  });
+};
